@@ -1,0 +1,70 @@
+import numpy as np
+
+# Sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# Training Data for XOR
+X = np.array([[0, 0],
+              [0, 1],
+              [1, 0],
+              [1, 1]])
+
+# Expected XOR output
+y = np.array([[0], [1], [1], [0]])
+
+# Initialize weights and biases randomly
+np.random.seed(1)
+input_size = 2
+hidden_size = 3
+output_size = 1
+
+W1 = np.random.uniform(-1, 1, (input_size, hidden_size))  # Weights for input -> hidden
+
+b1 = np.random.uniform(-1, 1, (1, hidden_size))  # Bias for hidden layer
+W2 = np.random.uniform(-1, 1, (hidden_size, output_size))  # Weights for hidden -> output
+
+b2 = np.random.uniform(-1, 1, (1, output_size))  # Bias for output layer
+
+# Training parameters
+epochs = 10000
+learning_rate = 0.1
+
+# Training loop
+for epoch in range(epochs):
+    # ---- Forward Pass ----
+    hidden_input = np.dot(X, W1) + b1  # Net input to hidden layer
+    hidden_output = sigmoid(hidden_input)  # Activation of hidden layer
+
+    final_input = np.dot(hidden_output, W2) + b2  # Net input to output layer
+    predicted_output = sigmoid(final_input)  # Activation of output layer
+
+    # ---- Compute Error ----
+    error = (y - predicted_output)
+    #print(final_output)
+    # ---- Backpropagation ----
+    # Compute gradients for output layer
+    error2 = error * sigmoid_derivative(predicted_output)
+    #print (d_output)
+
+
+    # Compute gradients for hidden layer
+    error1 = np.dot(error2, W2.T) * sigmoid_derivative(hidden_output)
+
+    # ---- Update Weights and Biases ----
+    W2 += np.dot(hidden_output.T, error2) * learning_rate
+    b2 += np.sum(error2, axis=0, keepdims=True) * learning_rate
+    W1 += np.dot(X.T, error1) * learning_rate
+    b1 += np.sum(error1, axis=0, keepdims=True) * learning_rate
+
+    # Print loss every 1000 epochs
+    if epoch % 1000 == 0:
+        loss = np.mean(np.abs(error))
+        print(f"Epoch {epoch}: Loss = {loss:.4f}")
+
+# ---- Testing the trained network ----
+print("\nTrained Network Output:")
+print(predicted_output.round())  # Rounded output for XOR operation
